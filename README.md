@@ -1,10 +1,10 @@
-# Cache Perpustakaan Digital — Simulasi Strategi Caching
+# Cache Perpustakaan Digital ï¿½ Simulasi Strategi Caching
 
 > **Tugas Mata Kuliah: Scalable Systems**
 > **Nama:** Nur Alam Nasyrah
 > **NIM:** 105841104823
 >
-> Simulasi konsep Caching pada sistem Perpustakaan Digital menggunakan Node.js + Express — Redis, Memcached, CDN, Cache Strategies, dan Eviction Policies.
+> Simulasi konsep Caching pada sistem Perpustakaan Digital menggunakan Node.js + Express ï¿½ Redis, Memcached, CDN, Cache Strategies, dan Eviction Policies.
 
 ---
 
@@ -93,25 +93,25 @@ Cache layer otomatis load dari DB saat miss, transparan untuk aplikasi.
 ```
 tugas-chacing2/
 +-- src/
-¦   +-- app.js
-¦   +-- data/mockDatabase.js          # 8 buku, 5 pengarang
-¦   +-- simulations/
-¦   ¦   +-- RedisSimulation.js
-¦   ¦   +-- MemcachedSimulation.js
-¦   ¦   +-- CDNSimulation.js
-¦   ¦   +-- EvictionStrategies.js
-¦   +-- strategies/
-¦   ¦   +-- CacheAside.js
-¦   ¦   +-- WriteThrough.js
-¦   ¦   +-- WriteBehind.js
-¦   ¦   +-- ReadThrough.js
-¦   +-- routes/
-¦       +-- cacheStrategyRoutes.js
-¦       +-- redisRoutes.js
-¦       +-- memcachedRoutes.js
-¦       +-- cdnRoutes.js
-¦       +-- evictionRoutes.js
-¦       +-- statsRoutes.js
+ï¿½   +-- app.js
+ï¿½   +-- data/mockDatabase.js          # 8 buku, 5 pengarang
+ï¿½   +-- simulations/
+ï¿½   ï¿½   +-- RedisSimulation.js
+ï¿½   ï¿½   +-- MemcachedSimulation.js
+ï¿½   ï¿½   +-- CDNSimulation.js
+ï¿½   ï¿½   +-- EvictionStrategies.js
+ï¿½   +-- strategies/
+ï¿½   ï¿½   +-- CacheAside.js
+ï¿½   ï¿½   +-- WriteThrough.js
+ï¿½   ï¿½   +-- WriteBehind.js
+ï¿½   ï¿½   +-- ReadThrough.js
+ï¿½   +-- routes/
+ï¿½       +-- cacheStrategyRoutes.js
+ï¿½       +-- redisRoutes.js
+ï¿½       +-- memcachedRoutes.js
+ï¿½       +-- cdnRoutes.js
+ï¿½       +-- evictionRoutes.js
+ï¿½       +-- statsRoutes.js
 +-- Screenshot/
 +-- postman_collection.json
 +-- README.md
@@ -150,7 +150,7 @@ Server ? **http://localhost:3000**
 | GET | `/api/strategies/read-through/pengarang/:id` | Get pengarang |
 
 ### Redis `/api/redis`
-String, Hash, List, Set, Sorted Set, TTL — lihat `/api/redis/info`
+String, Hash, List, Set, Sorted Set, TTL ï¿½ lihat `/api/redis/info`
 
 ### Memcached `/api/memcached`
 SET, GET, GETS+CAS, ADD, REPLACE, INCR, DECR
@@ -162,43 +162,58 @@ SET, GET, GETS+CAS, ADD, REPLACE, INCR, DECR
 `GET /api/eviction/lru/demo` | `lfu/demo` | `fifo/demo` | `ttl/demo`
 
 ### Stats `/api/stats`
-`GET /api/stats` · `GET /api/stats/comparison`
+`GET /api/stats` ï¿½ `GET /api/stats/comparison`
 
 ---
 
 ## Hasil Pengujian (Screenshot)
 
-### SS-1 — Cache MISS (Cache-Aside)
-![Cache MISS](Screenshot/Cache%20MISS%20(Cache-Aside).png)
+### SS-1 â€” Cache MISS (Cache-Aside Buku)
+Endpoint: `GET /api/strategies/cache-aside/buku`
+Response menunjukkan `"cacheStatus":"MISS"` â€” data 8 buku diambil dari database (~168ms)
 
-### SS-2 — Cache HIT (Cache-Aside)
-![Cache HIT](Screenshot/Cache%20HIT%20(Cache-Aside).png)
+![Cache MISS](Screenshot/Cache%20MISS%20Semua%20Buku.png)
 
-### SS-3 — LRU Eviction Demo
-![LRU Demo](Screenshot/Eviction%20LRU%20Demo.png)
+### SS-2 â€” Write-Through Cache HIT
+Endpoint: `GET /api/strategies/write-through/buku`
+Response menunjukkan `"cacheStatus":"HIT"` â€” data langsung dari cache (~91ms)
 
-### SS-4 — Redis Operasi Dasar
-![Redis](Screenshot/Redis%20Operasi%20Dasar.png)
+![Write-Through HIT](Screenshot/Write-Through%20Tambah%20Buku.png)
 
-### SS-5 — Stats Dashboard
-![Stats](Screenshot/Stats%20Dashboard%20(Penutup).png)
+### SS-3 â€” LRU Eviction Demo (Genre Buku)
+Endpoint: `GET /api/eviction/lru/demo`
+Menampilkan genre `fiksi`, `nonfiksi`, `sains`, `sejarah`, `teknologi` â€” genre `fiksi` di-evict
+
+![LRU Demo](Screenshot/LRU%20Demo%20Genre%20Buku.png)
+
+### SS-4 â€” Redis GET Buku Terlaris
+Endpoint: `GET /api/redis/get/buku:terlaris`
+Response menunjukkan `"cacheStatus":"HIT"` â€” value `"Bumi Manusia"` (~14ms)
+
+![Redis GET](Screenshot/Get%20Redis.png)
+
+### SS-5 â€” Stats Dashboard
+Endpoint: `GET /api/stats`
+Menampilkan `"title":"Cache Perpustakaan Digital â€” Dashboard Statistik"` dengan data LRU, Redis, database
+
+![Stats Dashboard](Screenshot/Stats%20Dashboard.png)
 
 ---
 
 ## Panduan Pengujian
 
 ```
-Test 1 — Cache MISS: GET /api/strategies/cache-aside/buku/1  (pertama kali)
-Test 2 — Cache HIT:  GET /api/strategies/cache-aside/buku/1  (kedua kali)
-Test 3 — LRU Demo:   GET /api/eviction/lru/demo
-Test 4 — Redis GET:  POST /api/redis/set ? GET /api/redis/get/:key
-Test 5 — Dashboard:  GET /api/stats
+Test 1 ï¿½ Cache MISS: GET /api/strategies/cache-aside/buku/1  (pertama kali)
+Test 2 ï¿½ Cache HIT:  GET /api/strategies/cache-aside/buku/1  (kedua kali)
+Test 3 ï¿½ LRU Demo:   GET /api/eviction/lru/demo
+Test 4 ï¿½ Redis GET:  POST /api/redis/set ? GET /api/redis/get/:key
+Test 5 ï¿½ Dashboard:  GET /api/stats
 ```
 
 ---
 
 ## Teknologi
 
-Node.js · Express.js · Morgan · CORS · dotenv · uuid
+Node.js ï¿½ Express.js ï¿½ Morgan ï¿½ CORS ï¿½ dotenv ï¿½ uuid
 
 > Tidak memerlukan instalasi Redis, Memcached, atau database eksternal.
