@@ -1,0 +1,158 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-1234-5678-abcd-portal-berita",
+    "name": "Portal Berita Cache API",
+    "description": "Simulasi Caching pada Sistem Portal Berita: Redis, Memcached, CDN, Strategi Cache & Eviction Policies",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "API Overview",
+      "item": [
+        {
+          "name": "GET - Ringkasan API",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/", "host": ["{{baseUrl}}"], "path": ["/"] } },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Strategi Cache",
+      "item": [
+        {
+          "name": "Cache-Aside (Lazy Loading)",
+          "item": [
+            { "name": "GET All Artikel (1st = MISS)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel"] } }, "response": [] },
+            { "name": "GET All Artikel (2nd = HIT)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel"] } }, "response": [] },
+            { "name": "GET Artikel by ID (MISS)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel/1", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel","1"] } }, "response": [] },
+            { "name": "GET Artikel by ID (HIT)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel/1", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel","1"] } }, "response": [] },
+            { "name": "POST Tambah Artikel", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Smart Watch X200\",\n  \"price\": 2500000,\n  \"category\": \"Wearables\",\n  \"stock\": 30,\n  \"brand\": \"TechGear\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel"] } }, "response": [] },
+            { "name": "PUT Update Artikel (invalidasi cache)", "request": { "method": "PUT", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"price\": 14500000,\n  \"stock\": 45\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel/1", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel","1"] } }, "response": [] },
+            { "name": "DELETE Artikel (invalidasi cache)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/cache-aside/artikel/5", "host": ["{{baseUrl}}"], "path": ["api","strategies","cache-aside","artikel","5"] } }, "response": [] }
+          ]
+        },
+        {
+          "name": "Write-Through (Tulis Sinkron)",
+          "item": [
+            { "name": "POST Tambah Artikel (tulis ke cache + DB)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Noise-Cancelling Headphones\",\n  \"price\": 3500000,\n  \"category\": \"Audio\",\n  \"stock\": 25,\n  \"brand\": \"AudioPro\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/strategies/write-through/artikel", "host": ["{{baseUrl}}"], "path": ["api","strategies","write-through","artikel"] } }, "response": [] },
+            { "name": "GET Artikel (HIT setelah write-through)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/write-through/artikel/1", "host": ["{{baseUrl}}"], "path": ["api","strategies","write-through","artikel","1"] } }, "response": [] },
+            { "name": "PUT Update Artikel (write-through)", "request": { "method": "PUT", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"price\": 16000000,\n  \"stock\": 40\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/strategies/write-through/artikel/1", "host": ["{{baseUrl}}"], "path": ["api","strategies","write-through","artikel","1"] } }, "response": [] }
+          ]
+        },
+        {
+          "name": "Write-Behind (Tulis Async)",
+          "item": [
+            { "name": "POST Tambah Artikel (instan - cache only)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Tablet Pro 11\",\n  \"price\": 8000000,\n  \"category\": \"Tablets\",\n  \"stock\": 20,\n  \"brand\": \"TechBrand\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/strategies/write-behind/artikel", "host": ["{{baseUrl}}"], "path": ["api","strategies","write-behind","artikel"] } }, "response": [] },
+            { "name": "GET Status Antrian Write", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/write-behind/antrian", "host": ["{{baseUrl}}"], "path": ["api","strategies","write-behind","antrian"] } }, "response": [] },
+            { "name": "POST Force Flush Queue to DB", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/write-behind/flush", "host": ["{{baseUrl}}"], "path": ["api","strategies","write-behind","flush"] } }, "response": [] }
+          ]
+        },
+        {
+          "name": "Read-Through (Baca Transparan)",
+          "item": [
+            { "name": "GET Artikel (transparent cache load)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/read-through/artikel/2", "host": ["{{baseUrl}}"], "path": ["api","strategies","read-through","artikel","2"] } }, "response": [] },
+            { "name": "GET Artikel (2nd call = HIT)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/read-through/artikel/2", "host": ["{{baseUrl}}"], "path": ["api","strategies","read-through","artikel","2"] } }, "response": [] },
+            { "name": "GET Penulis by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/read-through/penulis/1", "host": ["{{baseUrl}}"], "path": ["api","strategies","read-through","penulis","1"] } }, "response": [] },
+            { "name": "DELETE Invalidate Cache Key", "request": { "method": "DELETE", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:2\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/strategies/read-through/invalidate", "host": ["{{baseUrl}}"], "path": ["api","strategies","read-through","invalidate"] } }, "response": [] },
+            { "name": "GET Read-Through Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/strategies/read-through/stats", "host": ["{{baseUrl}}"], "path": ["api","strategies","read-through","stats"] } }, "response": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Simulasi Redis",
+      "item": [
+        { "name": "GET Redis INFO", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/info", "host": ["{{baseUrl}}"], "path": ["api","redis","info"] } }, "response": [] },
+        { "name": "GET DBSIZE", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/dbsize", "host": ["{{baseUrl}}"], "path": ["api","redis","dbsize"] } }, "response": [] },
+        { "name": "String - SET", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"user:1001\",\n  \"value\": \"Budi Santoso\",\n  \"ex\": 60\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/set", "host": ["{{baseUrl}}"], "path": ["api","redis","set"] } }, "response": [] },
+        { "name": "String - GET", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/get/user:1001", "host": ["{{baseUrl}}"], "path": ["api","redis","get","user:1001"] } }, "response": [] },
+        { "name": "String - TTL", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/ttl/user:1001", "host": ["{{baseUrl}}"], "path": ["api","redis","ttl","user:1001"] } }, "response": [] },
+        { "name": "String - EXPIRE", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"user:1001\",\n  \"seconds\": 120\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/expire", "host": ["{{baseUrl}}"], "path": ["api","redis","expire"] } }, "response": [] },
+        { "name": "String - INCR counter", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"page:views\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/incr", "host": ["{{baseUrl}}"], "path": ["api","redis","incr"] } }, "response": [] },
+        { "name": "String - INCRBY", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"cart:total\",\n  \"amount\": 250000\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/incrby", "host": ["{{baseUrl}}"], "path": ["api","redis","incrby"] } }, "response": [] },
+        { "name": "String - MSET", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"pairs\": {\n    \"color:1\": \"red\",\n    \"color:2\": \"blue\",\n    \"color:3\": \"green\"\n  }\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/mset", "host": ["{{baseUrl}}"], "path": ["api","redis","mset"] } }, "response": [] },
+        { "name": "String - MGET", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"keys\": [\"color:1\", \"color:2\", \"color:3\", \"color:99\"]\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/mget", "host": ["{{baseUrl}}"], "path": ["api","redis","mget"] } }, "response": [] },
+        { "name": "String - KEYS pattern", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/keys?pattern=color:*", "host": ["{{baseUrl}}"], "path": ["api","redis","keys"], "query": [{"key":"pattern","value":"color:*"}] } }, "response": [] },
+        { "name": "Hash - HSET session", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"session:abc123\",\n  \"fields\": {\n    \"userId\": \"1001\",\n    \"role\": \"admin\",\n    \"loginAt\": \"2026-07-10T08:00:00Z\",\n    \"ip\": \"192.168.1.1\"\n  }\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/hset", "host": ["{{baseUrl}}"], "path": ["api","redis","hset"] } }, "response": [] },
+        { "name": "Hash - HGETALL session", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/hgetall/session:abc123", "host": ["{{baseUrl}}"], "path": ["api","redis","hgetall","session:abc123"] } }, "response": [] },
+        { "name": "Hash - HGET single field", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/hget/session:abc123/userId", "host": ["{{baseUrl}}"], "path": ["api","redis","hget","session:abc123","userId"] } }, "response": [] },
+        { "name": "List - LPUSH queue", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"job:queue\",\n  \"values\": [\"email:1001\", \"email:1002\", \"sms:2001\"]\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/lpush", "host": ["{{baseUrl}}"], "path": ["api","redis","lpush"] } }, "response": [] },
+        { "name": "List - LRANGE all", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/lrange/job:queue?start=0&stop=-1", "host": ["{{baseUrl}}"], "path": ["api","redis","lrange","job:queue"], "query": [{"key":"start","value":"0"},{"key":"stop","value":"-1"}] } }, "response": [] },
+        { "name": "Set - SADD tags", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1:tags\",\n  \"members\": [\"electronics\", \"laptop\", \"sale\", \"featured\"]\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/sadd", "host": ["{{baseUrl}}"], "path": ["api","redis","sadd"] } }, "response": [] },
+        { "name": "Set - SMEMBERS", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/smembers/product:1:tags", "host": ["{{baseUrl}}"], "path": ["api","redis","smembers","artikel:1:tags"] } }, "response": [] },
+        { "name": "Sorted Set - ZADD leaderboard", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"leaderboard\",\n  \"members\": [\n    { \"score\": 9500, \"member\": \"Budi\" },\n    { \"score\": 8200, \"member\": \"Siti\" },\n    { \"score\": 7800, \"member\": \"Ahmad\" },\n    { \"score\": 9100, \"member\": \"Dewi\" }\n  ]\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/redis/zadd", "host": ["{{baseUrl}}"], "path": ["api","redis","zadd"] } }, "response": [] },
+        { "name": "Sorted Set - ZRANGE", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/zrange/leaderboard?start=0&stop=-1", "host": ["{{baseUrl}}"], "path": ["api","redis","zrange","leaderboard"], "query": [{"key":"start","value":"0"},{"key":"stop","value":"-1"}] } }, "response": [] },
+        { "name": "DELETE key", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/del/user:1001", "host": ["{{baseUrl}}"], "path": ["api","redis","del","user:1001"] } }, "response": [] },
+        { "name": "POST FLUSH DB", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/redis/flush", "host": ["{{baseUrl}}"], "path": ["api","redis","flush"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Simulasi Memcached",
+      "item": [
+        { "name": "GET Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/memcached/stats", "host": ["{{baseUrl}}"], "path": ["api","memcached","stats"] } }, "response": [] },
+        { "name": "SET product", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1\",\n  \"value\": \"Laptop Pro X1\",\n  \"ttl\": 60,\n  \"flags\": 0\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/set", "host": ["{{baseUrl}}"], "path": ["api","memcached","set"] } }, "response": [] },
+        { "name": "GET product", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/memcached/get/product:1", "host": ["{{baseUrl}}"], "path": ["api","memcached","get","product:1"] } }, "response": [] },
+        { "name": "GETS product (with CAS token)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/memcached/gets/product:1", "host": ["{{baseUrl}}"], "path": ["api","memcached","gets","product:1"] } }, "response": [] },
+        { "name": "CAS - Check-And-Set (copy casToken from GETS)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1\",\n  \"value\": \"Laptop Pro X1 - Updated\",\n  \"ttl\": 60,\n  \"casToken\": \"PASTE_CAS_TOKEN_HERE\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/cas", "host": ["{{baseUrl}}"], "path": ["api","memcached","cas"] } }, "response": [] },
+        { "name": "ADD (only if not exists)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"new:item\",\n  \"value\": \"New Value\",\n  \"ttl\": 30\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/add", "host": ["{{baseUrl}}"], "path": ["api","memcached","add"] } }, "response": [] },
+        { "name": "ADD (overwrite attempt - returns NOT_STORED)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1\",\n  \"value\": \"Should not store\",\n  \"ttl\": 30\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/add", "host": ["{{baseUrl}}"], "path": ["api","memcached","add"] } }, "response": [] },
+        { "name": "REPLACE (only if exists)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1\",\n  \"value\": \"Laptop Pro X1 - Replaced\",\n  \"ttl\": 60\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/replace", "host": ["{{baseUrl}}"], "path": ["api","memcached","replace"] } }, "response": [] },
+        { "name": "APPEND", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1\",\n  \"value\": \" [SALE]\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/append", "host": ["{{baseUrl}}"], "path": ["api","memcached","append"] } }, "response": [] },
+        { "name": "PREPEND", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"product:1\",\n  \"value\": \"[HOT] \"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/prepend", "host": ["{{baseUrl}}"], "path": ["api","memcached","prepend"] } }, "response": [] },
+        { "name": "INCR counter", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"visit:count\",\n  \"amount\": 1\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/incr", "host": ["{{baseUrl}}"], "path": ["api","memcached","incr"] } }, "response": [] },
+        { "name": "DECR counter", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"visit:count\",\n  \"amount\": 1\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/memcached/decr", "host": ["{{baseUrl}}"], "path": ["api","memcached","decr"] } }, "response": [] },
+        { "name": "DELETE key", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/memcached/delete/product:1", "host": ["{{baseUrl}}"], "path": ["api","memcached","delete","product:1"] } }, "response": [] },
+        { "name": "FLUSH ALL", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/memcached/flush", "host": ["{{baseUrl}}"], "path": ["api","memcached","flush"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Simulasi CDN",
+      "item": [
+        { "name": "GET Edge Servers Status", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/edges", "host": ["{{baseUrl}}"], "path": ["api","cdn","edges"] } }, "response": [] },
+        { "name": "GET Image MISS - first request", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/resource?url=/assets/logo-berita.png&edge=JKT", "host": ["{{baseUrl}}"], "path": ["api","cdn","resource"], "query": [{"key":"url","value":"/assets/logo-berita.png"},{"key":"edge","value":"JKT"}] } }, "response": [] },
+        { "name": "GET Image HIT - second request", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/resource?url=/assets/logo-berita.png&edge=JKT", "host": ["{{baseUrl}}"], "path": ["api","cdn","resource"], "query": [{"key":"url","value":"/assets/logo-berita.png"},{"key":"edge","value":"JKT"}] } }, "response": [] },
+        { "name": "GET Image from Singapore edge", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/resource?url=/assets/logo-berita.png&edge=SIN", "host": ["{{baseUrl}}"], "path": ["api","cdn","resource"], "query": [{"key":"url","value":"/assets/logo-berita.png"},{"key":"edge","value":"SIN"}] } }, "response": [] },
+        { "name": "GET CSS file", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/resource?url=/css/portal.css&edge=JKT", "host": ["{{baseUrl}}"], "path": ["api","cdn","resource"], "query": [{"key":"url","value":"/css/styles.css"},{"key":"edge","value":"JKT"}] } }, "response": [] },
+        { "name": "GET API Response (short TTL)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/resource?url=/api/artikel&edge=JKT", "host": ["{{baseUrl}}"], "path": ["api","cdn","resource"], "query": [{"key":"url","value":"/api/products"},{"key":"edge","value":"JKT"}] } }, "response": [] },
+        { "name": "POST Upload New Resource to Origin", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"url\": \"/images/new-banner.jpg\",\n  \"body\": { \"type\": \"image\", \"src\": \"new-banner.jpg\", \"size\": \"150KB\" },\n  \"contentType\": \"image\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/cdn/upload", "host": ["{{baseUrl}}"], "path": ["api","cdn","upload"] } }, "response": [] },
+        { "name": "POST Invalidate specific URL", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"url\": \"/images/logo.png\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/cdn/invalidate", "host": ["{{baseUrl}}"], "path": ["api","cdn","invalidate"] } }, "response": [] },
+        { "name": "POST Invalidate by tag (all images)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"tag\": \"image\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/cdn/invalidate", "host": ["{{baseUrl}}"], "path": ["api","cdn","invalidate"] } }, "response": [] },
+        { "name": "POST Invalidate multiple URLs", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"urls\": [\"/css/styles.css\", \"/js/app.js\"]\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/cdn/invalidate", "host": ["{{baseUrl}}"], "path": ["api","cdn","invalidate"] } }, "response": [] },
+        { "name": "POST Purge ALL CDN cache", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/purge", "host": ["{{baseUrl}}"], "path": ["api","cdn","purge"] } }, "response": [] },
+        { "name": "GET CDN Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/cdn/stats", "host": ["{{baseUrl}}"], "path": ["api","cdn","stats"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Kebijakan Eviction",
+      "item": [
+        { "name": "LRU Demo (auto-runs scenario)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/lru/demo", "host": ["{{baseUrl}}"], "path": ["api","eviction","lru","demo"] } }, "response": [] },
+        { "name": "LRU - SET item", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"page:home\",\n  \"value\": \"Home Page\"\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/eviction/lru/set", "host": ["{{baseUrl}}"], "path": ["api","eviction","lru","set"] } }, "response": [] },
+        { "name": "LRU - GET item (updates recency)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/lru/get/page:home", "host": ["{{baseUrl}}"], "path": ["api","eviction","lru","get","page:home"] } }, "response": [] },
+        { "name": "LRU - Inspect cache order", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/lru/inspect", "host": ["{{baseUrl}}"], "path": ["api","eviction","lru","inspect"] } }, "response": [] },
+        { "name": "LFU Demo (auto-runs scenario)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/lfu/demo", "host": ["{{baseUrl}}"], "path": ["api","eviction","lfu","demo"] } }, "response": [] },
+        { "name": "LFU - Inspect (sorted by frequency)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/lfu/inspect", "host": ["{{baseUrl}}"], "path": ["api","eviction","lfu","inspect"] } }, "response": [] },
+        { "name": "FIFO Demo", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/fifo/demo", "host": ["{{baseUrl}}"], "path": ["api","eviction","fifo","demo"] } }, "response": [] },
+        { "name": "TTL Demo", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/ttl/demo", "host": ["{{baseUrl}}"], "path": ["api","eviction","ttl","demo"] } }, "response": [] },
+        { "name": "TTL - SET item with custom TTL", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\n  \"key\": \"flash:sale\",\n  \"value\": \"50% OFF - 5 seconds only!\",\n  \"ttl\": 5\n}", "options": {"raw": {"language": "json"}} }, "url": { "raw": "{{baseUrl}}/api/eviction/ttl/set", "host": ["{{baseUrl}}"], "path": ["api","eviction","ttl","set"] } }, "response": [] },
+        { "name": "TTL - GET (should be present)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/ttl/get/flash:sale", "host": ["{{baseUrl}}"], "path": ["api","eviction","ttl","get","breaking:news"] } }, "response": [] },
+        { "name": "TTL - List all items with remaining TTL", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/ttl/list", "host": ["{{baseUrl}}"], "path": ["api","eviction","ttl","list"] } }, "response": [] },
+        { "name": "Clear all eviction caches", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/eviction/all/clear", "host": ["{{baseUrl}}"], "path": ["api","eviction","all","clear"] } }, "response": [] }
+      ]
+    },
+    {
+      "name": "Statistik dan Perbandingan",
+      "item": [
+        { "name": "GET Stats Dashboard (all)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/stats", "host": ["{{baseUrl}}"], "path": ["api","stats"] } }, "response": [] },
+        { "name": "GET Redis Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/stats/redis", "host": ["{{baseUrl}}"], "path": ["api","stats","redis"] } }, "response": [] },
+        { "name": "GET Memcached Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/stats/memcached", "host": ["{{baseUrl}}"], "path": ["api","stats","memcached"] } }, "response": [] },
+        { "name": "GET CDN Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/stats/cdn", "host": ["{{baseUrl}}"], "path": ["api","stats","cdn"] } }, "response": [] },
+        { "name": "GET Eviction Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/stats/eviction", "host": ["{{baseUrl}}"], "path": ["api","stats","eviction"] } }, "response": [] },
+        { "name": "GET Cache System Comparison", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/stats/comparison", "host": ["{{baseUrl}}"], "path": ["api","stats","comparison"] } }, "response": [] },
+        { "name": "POST Reset All Stats", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/stats/reset", "host": ["{{baseUrl}}"], "path": ["api","stats","reset"] } }, "response": [] }
+      ]
+    }
+  ]
+}

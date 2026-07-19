@@ -1,0 +1,23 @@
+{
+  "name": "perpustakaan-digital-cache",
+  "version": "1.0.0",
+  "description": "Simulasi Caching pada Sistem Perpustakaan Digital: Redis, Memcached, CDN, Strategi Cache & Eviction Policies",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": ["caching","perpustakaan-digital","redis-cache","memcached-cache","cdn-simulation","cache-eviction","lru","lfu","scalable-systems"],
+  "author": "Nur Alam Nasyrah - 105841104823",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
